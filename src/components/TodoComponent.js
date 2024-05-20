@@ -6,14 +6,18 @@ import { setTodos } from '../features/todos/todoSlice';
 import api from '../api';
 
 const fetchTodos = async () => {
-  const { data } = await api.get('/todos');
-  return data;
+  try {
+    const { data } = await api.get('/todos');
+    return data;
+  } catch (error) {
+    return error
+  }
 };
 
 const TodoComponent = () => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
-  const todos = useSelector((state) => state.todos.todos);
+  const todos = useSelector((state) => state.todos.todos) || [];
   const [newTodo, setNewTodo] = useState('');
 
   const {  isFetching, isLoading , error} = useQuery('todos', fetchTodos, {
@@ -31,7 +35,12 @@ const TodoComponent = () => {
 
 
   const handleAddTodo = async () => {
-    await api.post('/todos', { title: newTodo, completed: false });
+
+    try {
+      await api.post('/todos', { title: newTodo, completed: false });
+    } catch (error) {
+      console.log(error);
+    }
     queryClient.invalidateQueries('todos');
     setNewTodo('');
   };
